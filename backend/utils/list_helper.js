@@ -31,6 +31,10 @@ const favoriteBlog = (blogs) => {
 }
 
 const mostBlogs = (blogs) => {
+  if (blogs.length === 0) {
+    return {}
+  }
+
   const blogsByAuthors = _.groupBy(blogs, 'author')
   // blogsByAuthors is a dictionary-like object where the key is the author name
   // and the value is an array of blogs belonging to that author
@@ -50,9 +54,34 @@ const mostBlogs = (blogs) => {
   return _.maxBy(b, 'blogs')
 }
 
+const mostLikes = (blogs) => {
+  if (blogs.length === 0) {
+    return {}
+  }
+
+  const blogsByAuthors = _.groupBy(blogs, 'author')
+  // blogsByAuthors is a dictionary-like object where the key is the author name
+  // and the value is an array of blogs belonging to that author
+
+  const a = _.mapValues(blogsByAuthors, (arrayOfBlogs, author) => {
+    return {
+      author: author,
+      likes: arrayOfBlogs.map(blog => blog.likes).reduce((sum, item) => sum + item, 0)
+    }
+  })
+  // a is a dictionary-like object where the key is an author and the value
+  // is another object with 'author' -> author_name and 'likes' -> sum of all the likes from his blogs
+
+  const b = _.map(a, key => key)
+  // b is an array of a; needed for the maxBy below
+
+  return _.maxBy(b, 'likes')
+}
+
 module.exports = {
   // dummy,
   totalLikes,
   favoriteBlog,
-  mostBlogs
+  mostBlogs,
+  mostLikes
 }
