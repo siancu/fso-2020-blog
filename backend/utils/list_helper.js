@@ -1,6 +1,10 @@
+const _ = require('lodash')
+
 // const dummy = (blogs) => {
 //   return 1
 // }
+
+
 
 const totalLikes = (blogs) => {
   const reducer = (sum, item) => {
@@ -18,16 +22,7 @@ const favoriteBlog = (blogs) => {
     return {}
   }
 
-  let max = 0
-  let maxIndex = 0
-  blogs.forEach((blog, index) => {
-    if (blog.likes > max) {
-      max = blog.likes
-      maxIndex = index
-    }
-  })
-
-  const maxBlog = blogs[maxIndex]
+  const maxBlog = _.maxBy(blogs, blog => blog.likes)
   return {
     title: maxBlog.title,
     author: maxBlog.author,
