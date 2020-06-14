@@ -36,6 +36,12 @@ describe('get /api/blogs', () => {
 
     expect(titles).toContain('First class tests')
   })
+
+  test('a blog has a property named id', async () => {
+    const response = await api.get(baseUrl)
+    const firstBlog = response.body[0]
+    expect(firstBlog.id).toBeDefined()
+  })
 })
 
 afterAll(() => {
