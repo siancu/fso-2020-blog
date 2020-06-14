@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
-const apiHelper = require('./notes_api_test_helper')
+const apiHelper = require('./blogs_api_test_helper')
 const Blog = require('../models/blog')
 
 const api = supertest(app)
@@ -41,6 +41,36 @@ describe('get /api/blogs', () => {
     const response = await api.get(baseUrl)
     const firstBlog = response.body[0]
     expect(firstBlog.id).toBeDefined()
+  })
+})
+
+describe('get /api/blogs/:id', () => {
+  test('returns a blog with a valid id', async () => {
+    const blogsAtStart = await apiHelper.blogsInDb()
+    const blogToView = blogsAtStart[0]
+
+    const resultBlog = await api
+      .get(`${baseUrl}/${blogToView.id}`)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    expect(resultBlog.body).toEqual(blogToView)
+  })
+
+  test('fails with statuscode 404 if the blog does not exist', async () => {
+    const validNonExistingId = await apiHelper.nonExistingId()
+
+    await api
+      .get(`${baseUrl}/${validNonExistingId}`)
+      .expect(404)
+  })
+
+  test('fails with statuscode 400 if id is invalid', async () => {
+    const invalidId = '5a3d5da59070081a82a3445'
+
+    await api
+      .get(`${baseUrl}/${invalidId}`)
+      .expect(400)
   })
 })
 
@@ -114,6 +144,39 @@ describe('post /api/blogs', () => {
 
     const blogsAtEnd = await apiHelper.blogsInDb()
     expect(blogsAtEnd).toHaveLength(apiHelper.blogs.length)
+  })
+})
+
+describe('delete /api/blogs/:id', () => {
+  test('succeeds with statuscode 204 if valid id', async () => {
+    const blogsAtStart = await apiHelper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
+
+    await api
+      .delete(`${baseUrl}/${blogToDelete.id}`)
+      .expect(204)
+
+    const blogsAtEnd = await apiHelper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(blogsAtStart.length - 1)
+
+    const titles = blogsAtEnd.map(b => b.title)
+    expect(titles).not.toContain(blogToDelete.title)
+  })
+
+  test('fails with statuscode 404 if missing id', async () => {
+    const validButMissingId = await apiHelper.nonExistingId()
+
+    await api
+      .delete(`${baseUrl}/${validButMissingId}`)
+      .expect(404)
+  })
+
+  test('fails with statuscode 400 if invalid id', async () => {
+    const invalidId = '5a3d5da59070081a82a3445'
+
+    await api
+      .delete(`${baseUrl}/${invalidId}`)
+      .expect(400)
   })
 })
 
