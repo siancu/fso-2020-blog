@@ -83,6 +83,38 @@ describe('post /api/blogs', () => {
     const addedBlog = blogsAtEnd.filter(b => b.title === 'A Practical Guide to moment-timezone')[0]
     expect(addedBlog.likes).toBe(0)
   })
+
+  test('an entry with a missing title returns 400', async () => {
+    const newBlogWithoutTitle = {
+      author: 'Gigelu Corcochiftelu',
+      url: 'http://www.google.com',
+      likes: 1
+    }
+
+    await api
+      .post(baseUrl)
+      .send(newBlogWithoutTitle)
+      .expect(400)
+
+    const blogsAtEnd = await apiHelper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(apiHelper.blogs.length)
+  })
+
+  test('an entry with a missing url returns 400', async () => {
+    const newBlogWithoutTitle = {
+      title: 'Mega blog post',
+      author: 'Gigelu Corcochiftelu',
+      likes: 1
+    }
+
+    await api
+      .post(baseUrl)
+      .send(newBlogWithoutTitle)
+      .expect(400)
+
+    const blogsAtEnd = await apiHelper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(apiHelper.blogs.length)
+  })
 })
 
 afterAll(() => {
