@@ -180,6 +180,41 @@ describe('delete /api/blogs/:id', () => {
   })
 })
 
+describe('put /api/blogs/:id', () => {
+  test('succeeds with statuscode 204 if valid id', async () => {
+    const blogsAtStart = await apiHelper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
+    blogToUpdate.likes = 99
+
+    await api
+      .put(`${baseUrl}/${blogToUpdate.id}`)
+      .send(blogToUpdate)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await apiHelper.blogsInDb()
+    const updatedBlog = blogsAtEnd.filter(b => b.id === blogToUpdate.id)[0]
+
+    expect(updatedBlog.likes).toEqual(99)
+  })
+
+  test('fails with statuscode 404 if missing id', async () => {
+    const validButMissingId = await apiHelper.nonExistingId()
+
+    await api
+      .put(`${baseUrl}/${validButMissingId}`)
+      .expect(404)
+  })
+
+  test('fails with statuscode 400 if invalid id', async () => {
+    const invalidId = '5a3d5da59070081a82a3445'
+
+    await api
+      .put(`${baseUrl}/${invalidId}`)
+      .expect(400)
+  })
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
