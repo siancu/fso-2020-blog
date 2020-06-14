@@ -65,6 +65,24 @@ describe('post /api/blogs', () => {
     const titles = blogsAtEnd.map(r => r.title)
     expect(titles).toContain('From Static Sites To End User JAMstack Apps With FaunaDB')
   })
+
+  test('an entry with a missing likes property defaults it to 0', async () => {
+    const newBlogWithoutLikes = {
+      title: 'A Practical Guide to moment-timezone',
+      author: 'Valeri Karpov',
+      url: 'http://thecodebarbarian.com/a-practical-guide-to-moment-timezone.html'
+    }
+
+    await api
+      .post(baseUrl)
+      .send(newBlogWithoutLikes)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await apiHelper.blogsInDb()
+    const addedBlog = blogsAtEnd.filter(b => b.title === 'A Practical Guide to moment-timezone')[0]
+    expect(addedBlog.likes).toBe(0)
+  })
 })
 
 afterAll(() => {
