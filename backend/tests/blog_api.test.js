@@ -44,6 +44,29 @@ describe('get /api/blogs', () => {
   })
 })
 
+describe('post /api/blogs', () => {
+  test('a valid blog can be added', async () => {
+    const newBlog = {
+      title: 'From Static Sites To End User JAMstack Apps With FaunaDB',
+      author: 'Bryan Robinson',
+      url: 'https://www.smashingmagazine.com/2020/06/static-sites-jamstack-apps-faunadb/',
+      likes: 2
+    }
+
+    await api
+      .post(baseUrl)
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await apiHelper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(apiHelper.blogs.length + 1)
+
+    const titles = blogsAtEnd.map(r => r.title)
+    expect(titles).toContain('From Static Sites To End User JAMstack Apps With FaunaDB')
+  })
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
